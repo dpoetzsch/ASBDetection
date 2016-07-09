@@ -55,6 +55,13 @@ Alternatively, one can build the source files separately:
 ./dynalize.sh ./a.out
 ```
 
+## Run the tests
+
+```bash
+cd test
+./run_tests.py
+```
+
 ## How-To compile with dataflow sanitizer & intermediate bitcode
 The goal here is to compile with the dataflow sanitizer but with an intermediate output of the bitcode representation to allow calls to the `opt` command in between.
 

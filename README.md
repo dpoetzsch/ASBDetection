@@ -64,6 +64,8 @@ cd test
 ./run_tests.py
 ```
 
+See [`asb-examples`](https://github.com/dpoetzsch/asb-examples) for additional test cases.
+
 ## How-To compile with dataflow sanitizer & intermediate bitcode
 The goal here is to compile with the dataflow sanitizer but with an intermediate output of the bitcode representation to allow calls to the `opt` command in between.
 

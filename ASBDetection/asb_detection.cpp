@@ -3,10 +3,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/CommandLine.h"
 
-#include "taint.h"
-#include "taint_visitor.h"
+//#include "taint.h"
+//#include "taint_visitor.h"
 #include "instr_taintgrind.h"
-#include "dump.h"
+//#include "dump.h"
 
 using namespace llvm;
 
@@ -26,7 +26,7 @@ namespace TaintAnalysis {
                 return instrv.instrumentModule(M);
             }
             
-            bool taintChanged = true;
+	    /*            bool taintChanged = true;
             TaintVisitor vis;
             
             while (taintChanged) {
@@ -40,7 +40,7 @@ namespace TaintAnalysis {
                 dumper.visit(M);
                 // the module was not modified -> return false
                 return false;
-            }
+		}*/
 
             // the module was not modified -> return false
             return false;

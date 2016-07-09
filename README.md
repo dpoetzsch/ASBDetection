@@ -3,6 +3,8 @@ This describes how to compile the instrumentation tools, instrument your test pr
 
 ## Set-up
 
+This analysis is known to work on amd64 versions of Ubuntu 14.04 LTS and Fedora Linux 23.
+
 ### Prerequisits
 * [Download](http://llvm.org/releases/download.html#3.8.0) and [compile](http://llvm.org/releases/3.8.0/docs/GettingStarted.html) LLVM 3.8 including clang
 * Download and compile [`taintgrind`](https://github.com/wmkhoo/taintgrind).

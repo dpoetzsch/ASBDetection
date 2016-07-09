@@ -32,7 +32,8 @@ size_t __wrap_write(int channel, void* data, int size) {
     short* d = (short*) data;
     short c = 0;
     // for some reasons it does not work with chars
-    for (int i=0; i<(size/2); ++i) {
+    int i;
+    for (i=0; i<(size/2); ++i) {
         c |= d[i];
     }
     c |= (short) ((char*) data)[size-1];

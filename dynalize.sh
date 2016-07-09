@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #PROCESS_TOOL=$(dirname $0)/process-taintgrind/process-taintgrind-output.rb
 PROCESS_TOOL=$(dirname $0)/tgproc/target/release/tgproc

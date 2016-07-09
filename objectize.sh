@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 CLEANUP=1
 ARGS=""

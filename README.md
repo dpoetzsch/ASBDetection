@@ -57,6 +57,14 @@ Alternatively, one can build the source files separately:
 ./dynalize.sh ./a.out
 ```
 
+The `objectize.sh` script is a convenient way to create object files when debugging because it creates intermediate LLVM IR files with and without instrumentation.
+To disable cleanup of those files pass the `--no-cleanup` option to the script.
+However, in a real-world build the call to `objectize.sh` can be replaced by the following:
+
+```bash
+clang -g -Xclang -load -Xclang /path/to/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0 -c -o dest.o src.c
+```
+
 ## Run the tests
 
 ```bash

@@ -57,7 +57,7 @@ else
 fi
 
 clang -g -emit-llvm $CLANG_LLVM_FORMAT_ARG $ARGS -o "$BC1" "$SRC" && \
-    opt $OPT_LLVM_FORMAT_ARG -load $(dirname $0)/ASBDetection/libLLVMasbDetection.so -asb_detection -asb-log-level 0 < "$BC1" > "$BC2" && \
+    opt $OPT_LLVM_FORMAT_ARG -load $(dirname $0)/ASBDetection/libLLVMasbDetection.so -asb-detection -asb-log-level 0 < "$BC1" > "$BC2" && \
     clang -g -O0 -c -o "$DEST" "$BC2"
 
 if [ $CLEANUP = 1 ]; then

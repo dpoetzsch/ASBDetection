@@ -54,5 +54,5 @@ namespace TaintAnalysis {
                                               cl::value_desc("level"), cl::init(10));
     
     char ASBDetection::ID = 0;
-    static RegisterPass<ASBDetection> X("asb_detection", "instrument for address sensitivity detection", false, false);
+    static RegisterPass<ASBDetection> X("asb-detection", "instrument for address sensitivity detection", false, false);
 }

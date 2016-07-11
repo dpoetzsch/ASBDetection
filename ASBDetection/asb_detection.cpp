@@ -24,8 +24,9 @@ namespace TaintAnalysis {
 
         virtual bool runOnModule(Module &M) {
 //            if (optionInstrumentOnly) {
-                InstrTaintgrindVisitor instrv(optionLogLevel);
-                return instrv.instrumentModule(M);
+            InstrTaintgrindVisitor instrv(optionLogLevel);
+            bool modified = instrv.instrumentModule(M);
+            return modified;
 //            }
             
 	    /*            bool taintChanged = true;
@@ -71,6 +72,5 @@ static void registerMyPass(const PassManagerBuilder &,
 }
 // see http://llvm.org/docs/doxygen/html/classllvm_1_1PassManagerBuilder.html#a575d14758794b0997be4f8edcef7dc91
 // for details on the running order
-static RegisterStandardPasses
-    RegisterMyPass(PassManagerBuilder::EP_EnabledOnOptLevel0, // TODO this should be late as possible but it somehow crashes when directly building a .o file
-                   registerMyPass);
+static RegisterStandardPasses registerASBD1(PassManagerBuilder::EP_OptimizerLast, registerMyPass);
+static RegisterStandardPasses registerASBD2(PassManagerBuilder::EP_EnabledOnOptLevel0, registerMyPass);

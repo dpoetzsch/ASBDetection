@@ -74,3 +74,13 @@ static void registerMyPass(const PassManagerBuilder &,
 // for details on the running order
 static RegisterStandardPasses registerASBD1(PassManagerBuilder::EP_OptimizerLast, registerMyPass);
 static RegisterStandardPasses registerASBD2(PassManagerBuilder::EP_EnabledOnOptLevel0, registerMyPass);
+
+// according to https://github.com/rdadolf/clangtool/blob/master/clangtool.cpp
+// The location EP_OptimizerLast places this pass at the end of the list
+// of *optimizations*. That means on -O0, it does not get run.
+//
+// In general, adding your pass twice will cause it to run twice, but in this
+// particular case, the two are disjoint (EP_EnabledOnOptLevel0 only runs if
+// you're in -O0, and EP_OptimizerLast only runs if you're not). You can check
+// include/llvm/Transforms/IPO/PassManagerBuilder.h header and
+// lib/Transforms/IPO/PassManagerBuilder.cpp file for the exact behavior.

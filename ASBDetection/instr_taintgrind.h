@@ -24,9 +24,9 @@ namespace TaintAnalysis {
             builder.SetInsertPoint(startBlock);
 
             // 1. move all instructions after the source to a new BasicBlock
-            BasicBlock* doBodyBlock = BasicBlock::Create(getGlobalContext(), "doBody_" + taintSource->getName(), startBlock->getParent());
+            BasicBlock* doBodyBlock = BasicBlock::Create(startBlock->getContext(), "doBody_" + taintSource->getName(), startBlock->getParent());
                 
-            BasicBlock* endBlock = BasicBlock::Create(getGlobalContext(), "instrEnd_" + taintSource->getName(), startBlock->getParent());
+            BasicBlock* endBlock = BasicBlock::Create(startBlock->getContext(), "instrEnd_" + taintSource->getName(), startBlock->getParent());
 
             startBlock->replaceSuccessorsPhiUsesWith(endBlock);
 

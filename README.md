@@ -44,6 +44,8 @@ cd ..
 
 ## Run the analysis
 
+### Running for debugging purposes
+
 ```bash
 ./dynalize.sh src.c
 ```
@@ -59,7 +61,10 @@ Alternatively, one can build the source files separately:
 
 The `objectize.sh` script is a convenient way to create object files when debugging because it creates intermediate LLVM IR files with and without instrumentation.
 To disable cleanup of those files pass the `--no-cleanup` option to the script.
-However, in a real-world build the call to `objectize.sh` and `link.sh` can be replaced by the following commands:
+
+### Running without script support
+
+In a real-world build the call to `objectize.sh` and `link.sh` can be replaced by the following commands:
 
 ```bash
 # create object files
@@ -72,6 +77,16 @@ Or, in one command:
 
 ```bash
 clang -g -Xclang -load -Xclang /path/to/asb-detection/ASBDetection/libLLVMasbDetection.so -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write src.c /path/to/asb-detection/wrappers/libc_wrapper.o
+```
+
+### Integrating into autoconf/automake build
+
+```bash
+export CC=clang
+export CFLAGS=" -g -Xclang -load -Xclang /path/to/asb-detection/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0"
+export LDFLAGS="-g -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write /path/to/asb-detection/wrappers/libc_wrapper.o"
+./configure
+make
 ```
 
 ## Run the tests

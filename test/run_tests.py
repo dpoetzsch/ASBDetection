@@ -31,9 +31,6 @@ def invoke(directory, processes, valgrind):
     
     infrastructure.tests.executeTests(tests, processes)
 
-def get_executable():
-    return os.path.join(".", "asbdetect.sh")
-    
 def main():
     valgrind = False
     processes = 4

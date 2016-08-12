@@ -7,13 +7,13 @@ from infrastructure.tests import make_tests
 import os
 from os.path import splitext, basename
 
-optionals = []
+optionals = ["deref06"]
 
 def allTests():
     """
     This function returns a list of tests.
     """
-    tests = make_tests("instr_syscall", "../dynalize.sh", True, ["--no-color"])
+    tests = make_tests("mem", "../dynalize.sh", True, ["--no-color"])
     
     for test in tests:
         # mark optionals

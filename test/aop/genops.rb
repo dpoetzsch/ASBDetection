@@ -2,7 +2,7 @@
 
 require "fileutils"
 
-srcbase = "../instr_bop/bitnot"
+srcbase = "../bop/bitnot"
 destbase = ARGV[0]
 destop = ARGV[1]
 

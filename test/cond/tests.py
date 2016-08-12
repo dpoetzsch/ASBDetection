@@ -5,7 +5,6 @@ tests.py for dynamic taint analysis tests
 # import the test infrastructure
 from infrastructure.tests import make_tests
 import os
-from os.path import splitext, basename
 
 optionals = []
 
@@ -13,14 +12,14 @@ def allTests():
     """
     This function returns a list of tests.
     """
-    tests = make_tests("instr_bop", "../dynalize.sh", True, ["--no-color"])
+    tests = make_tests("cond", "../dynalize.sh", True, ["--no-color"])
     
     for test in tests:
         # mark optionals
-        if basename(splitext(splitext(test.getName())[0])[0]) in optionals:
+        if test.getName() in optionals:
             test.opt()
 
-        test.timeoutFactor = 5
+        test.timeoutFactor = 3
             
     return tests
 

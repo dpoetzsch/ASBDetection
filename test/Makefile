@@ -1,11 +1,8 @@
-DIRS := static-taint instr instr_aop instr_bop instr_lop instr_cop instr_cond instr_syscall instr_mem
+DIRS := instr instr_aop instr_bop instr_lop instr_cop instr_cond instr_syscall instr_mem
 
 .PHONY: $(DIRS) clean
 
 default: all
-
-%.static-taint:
-	$(MAKE) -C static-taint $*
 
 %.instr:
 	$(MAKE) -C instr $*

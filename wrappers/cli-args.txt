@@ -1,0 +1,1 @@
+-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write,-wrap,writev

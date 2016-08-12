@@ -71,13 +71,13 @@ ASB_DETECTION_HOME=/path/to/asb-detection
 # create object files
 clang -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0 -c -o src.o src.c
 # link the object files
-clang -g -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write src.o $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
+clang -g -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` src.o $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
 ```
 
 Or, in one command:
 
 ```bash
-ASB_DETECTION_HOME=/path/to/asb-detection clang -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write src.c $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
+ASB_DETECTION_HOME=/path/to/asb-detection clang -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` src.c $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
 ```
 
 ### Integrating into autoconf/automake build
@@ -86,7 +86,7 @@ ASB_DETECTION_HOME=/path/to/asb-detection clang -g -Xclang -load -Xclang $ASB_DE
 export ASB_DETECTION_HOME=/path/to/asb-detection
 export CC=clang
 export CFLAGS=" -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0"
-export LDFLAGS="-g -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write $ASB_DETECTION_HOME/wrappers/libc_wrapper.o"
+export LDFLAGS="-g -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` $ASB_DETECTION_HOME/wrappers/libc_wrapper.o"
 ./configure
 make
 ```

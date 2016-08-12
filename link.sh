@@ -13,4 +13,4 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-exec $CMD -g -O0 -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write $@ "$WRAPPERS_DIR"/libc_wrapper.o
+exec $CMD -g -O0 -Wl,`cat $WRAPPERS_DIR/cli-args.txt` $@ "$WRAPPERS_DIR"/libc_wrapper.o

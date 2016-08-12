@@ -7,7 +7,7 @@ from infrastructure.tests import make_tests
 import os
 from os.path import splitext, basename
 
-optionals = ["write04"]
+optionals = []
 
 def allTests():
     """

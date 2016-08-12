@@ -91,6 +91,14 @@ export LDFLAGS="-g -Wl,-wrap,malloc,-wrap,realloc,-wrap,calloc,-wrap,write $ASB_
 make
 ```
 
+Or, alternatively:
+
+```bash
+. path/to/asb-detection/setup-ac-build.sh
+./configure
+make
+```
+
 ## Run the tests
 
 ```bash

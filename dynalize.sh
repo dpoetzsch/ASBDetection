@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#PROCESS_TOOL=$(dirname $0)/process-taintgrind/process-taintgrind-output.rb
-PROCESS_TOOL=$(dirname $0)/tgproc/target/release/tgproc
-#PROCESS_TOOL=$(dirname $0)/tgproc/target/debug/tgproc
+#PROCESS_TOOL=$(dirname $BASH_SOURCE)/process-taintgrind/process-taintgrind-output.rb
+PROCESS_TOOL=$(dirname $BASH_SOURCE)/tgproc/target/release/tgproc
+#PROCESS_TOOL=$(dirname $BASH_SOURCE)/tgproc/target/debug/tgproc
 
 if [ -z "$1" ]; then
     echo "Usage: dynalize.sh [args] <executable | c-source>"
@@ -48,11 +48,11 @@ if [[ "$SRC" =~ \.c$ ]]; then
     
     OBJ_FILE="$TMP_BASE".o
     echo "Generating instrumented object file..."
-    $(dirname $0)/objectize.sh $OBJ_ARGS "$SRC" "$OBJ_FILE"
+    $(dirname $BASH_SOURCE)/objectize.sh $OBJ_ARGS "$SRC" "$OBJ_FILE"
     
     EXEC="$TMP_BASE"
     echo "Generating executable..."
-    $(dirname $0)/link.sh -o "$EXEC" "$OBJ_FILE"
+    $(dirname $BASH_SOURCE)/link.sh -o "$EXEC" "$OBJ_FILE"
     
     CLEANUP_FILES="$CLEANUP_FILES $OBJ_FILE $EXEC"
 else

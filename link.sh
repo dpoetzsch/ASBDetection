@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-WRAPPERS_DIR=$(dirname "$0")/wrappers
+WRAPPERS_DIR=$(dirname "$BASH_SOURCE")/wrappers
 
 CMD="clang"
 if [ "$1" = "clang++" ];then

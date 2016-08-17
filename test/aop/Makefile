@@ -9,10 +9,10 @@ C_FILES := $(wildcard *.c)
 	$(BUILD_TOOLS_DIR)/objectize.sh -O0 $< $@
 
 %.O1.o: %.c
-	$(BUILD_TOOLS_DIR)/objectize.sh -O0 $< $@
+	$(BUILD_TOOLS_DIR)/objectize.sh -O1 $< $@
 
 %.O3.o: %.c
-	$(BUILD_TOOLS_DIR)/objectize.sh -O0 $< $@
+	$(BUILD_TOOLS_DIR)/objectize.sh -O3 $< $@
 
 %.O0: %.O0.o
 	$(BUILD_TOOLS_DIR)/link.sh -o $@ $<

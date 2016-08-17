@@ -1,11 +1,8 @@
-DIRS := instr aop bop lop cop cond syscall mem world
+DIRS := aop bop lop cop cond syscall mem return world
 
 .PHONY: $(DIRS) clean
 
 default: all
-
-%.instr:
-	$(MAKE) -C instr $*
 
 %.aop:
 	$(MAKE) -C aop $*
@@ -25,7 +22,10 @@ default: all
 %.mem:
 	$(MAKE) -C mem $*
 
-%world:
+%.return:
+	$(MAKE) -C return $*
+
+%.world:
 	$(MAKE) -C world $*
 
 %.syscall:

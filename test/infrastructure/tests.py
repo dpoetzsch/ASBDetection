@@ -169,7 +169,7 @@ def get_tests_from_dir(directory):
     if os.path.exists(testfile):
         tests = imp.load_source("tests", testfile).allTests()
     else:
-        tests = make_tests(directory)
+        tests = make_tests(directory, "../dynalize.sh")
     return tests
 
 def invoke_test(test):

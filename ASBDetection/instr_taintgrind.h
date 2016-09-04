@@ -48,8 +48,10 @@ namespace TaintAnalysis {
             logState(10, endBlock->getParent());
 
             // 2. Store the value in a newly allocated memory cell
-            AllocaInst* taintCell = builder.CreateAlloca(taintSource->getType(), nullptr, "taintCell_" + taintSource->getName()); // TODO align 4?
-            Instruction* storeTaintSrc = builder.CreateStore(taintSource, taintCell); // TODO align??
+            const unsigned taintCellAlign = 8;
+            AllocaInst* taintCell = builder.CreateAlloca(taintSource->getType(), nullptr, "taintCell_" + taintSource->getName());
+            taintCell->setAlignment(taintCellAlign);
+            Instruction* storeTaintSrc = builder.CreateStore(taintSource, taintCell, taintCellAlign);
 
             logState(10, endBlock->getParent());
                 
@@ -60,9 +62,12 @@ namespace TaintAnalysis {
             // 3.b) allocate tmp vars
             Type* i64Ty = builder.getInt64Ty();
             Type* i64x6Ty = ArrayType::get(i64Ty, 6);
-            AllocaInst* zzq_args = builder.CreateAlloca(i64x6Ty, nullptr, "_zzq_args"); // TODO align 16?
-            AllocaInst* zzq_result = builder.CreateAlloca(i64Ty, nullptr, "_zzq_result"); // TODO align 8?
-            AllocaInst* tmp = builder.CreateAlloca(i64Ty, nullptr, "tmp"); // TODO align 8?
+            AllocaInst* zzq_args = builder.CreateAlloca(i64x6Ty, nullptr, "_zzq_args");
+            zzq_args->setAlignment(16);
+            AllocaInst* zzq_result = builder.CreateAlloca(i64Ty, nullptr, "_zzq_result");
+            zzq_result->setAlignment(8);
+            AllocaInst* tmp = builder.CreateAlloca(i64Ty, nullptr, "tmp");
+            tmp->setAlignment(8);
 
             builder.CreateBr(doBodyBlock);
             builder.SetInsertPoint(doBodyBlock);
@@ -70,25 +75,25 @@ namespace TaintAnalysis {
             // 3.c) spawn taintgrind instrumentation
             int val = taint ? 12 : 13; // 12 means taint, 13 means untaint
             Value* arrayidx = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 0, "arrayidx");
-            builder.CreateStore(ConstantInt::get(i64Ty, val), arrayidx, true); // TODO align 16?
+            builder.CreateAlignedStore(ConstantInt::get(i64Ty, val), arrayidx, 16, true);
 
             Value* taintCellI64 = builder.CreatePtrToInt(taintCell, i64Ty);
             Value* arrayidx1 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 1, "arrayidx1");
-            builder.CreateStore(taintCellI64, arrayidx1, true); // TODO align 8?
+            builder.CreateAlignedStore(taintCellI64, arrayidx1, 8, true);
 
             Value* arrayidx2 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 2, "arrayidx2");
             DataLayout dl(taintSource->getModule());
-            builder.CreateStore(ConstantInt::get(i64Ty, dl.getTypeAllocSize(taintSource->getType())), arrayidx2, true); // TODO align 16?
+            builder.CreateAlignedStore(ConstantInt::get(i64Ty, dl.getTypeAllocSize(taintSource->getType())), arrayidx2, 16, true);
 
             Value* arrayidx3 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 3, "arrayidx3");
-            //builder.CreateStore(builder.CreatePtrToInt(taintLabel, i64Ty), arrayidx3, true); // TODO align 8?
-            builder.CreateStore(ConstantInt::get(i64Ty, 0), arrayidx3, true); // TODO align 8?
+            //builder.CreateAlignedStore(builder.CreatePtrToInt(taintLabel, i64Ty), arrayidx3, 8, true);
+            builder.CreateAlignedStore(ConstantInt::get(i64Ty, 0), arrayidx3, 8, true);
 
             Value* arrayidx4 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 4, "arrayidx4");
-            builder.CreateStore(ConstantInt::get(i64Ty, 0), arrayidx4, true); // TODO align 16?
+            builder.CreateAlignedStore(ConstantInt::get(i64Ty, 0), arrayidx4, 16, true);
 
             Value* arrayidx5 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 5, "arrayidx5");
-            builder.CreateStore(ConstantInt::get(i64Ty, 0), arrayidx5, true); // TODO align 8?
+            builder.CreateAlignedStore(ConstantInt::get(i64Ty, 0), arrayidx5, 8, true);
 
             Value* arrayidx6 = builder.CreateConstInBoundsGEP2_64(zzq_args, 0, 0, "arrayidx6");
             FunctionType* asmTy = FunctionType::get(i64Ty, {PointerType::getUnqual(i64Ty), i64Ty}, false);
@@ -96,16 +101,16 @@ namespace TaintAnalysis {
             CallInst* callAsm = builder.CreateCall(tgAsm, {arrayidx6, ConstantInt::get(i64Ty, 0)});
             // TODO callAsm->addAttribute(0, Attribute::AttrKind::NoUnwind);
 
-            builder.CreateStore(callAsm, zzq_result, true); // TODO align 8?
-            Value* zzq_resultLoad = builder.CreateLoad(zzq_result, true); // TODO align 8?
+            builder.CreateAlignedStore(callAsm, zzq_result, 8, true);
+            Value* zzq_resultLoad = builder.CreateAlignedLoad(zzq_result, 8, true);
 
-            builder.CreateStore(zzq_resultLoad, tmp); // TODO align 8?
-            builder.CreateLoad(tmp); // TODO align 8?
+            builder.CreateAlignedStore(zzq_resultLoad, tmp, 8);
+            builder.CreateAlignedLoad(tmp, 8);
                 
             logState(10, endBlock->getParent());
                 
             // 4. load the value from memory again and replace all usages of the taint source with the loaded value
-            Value* taintedPtr = builder.CreateLoad(taintCell, "tainted_" + taintSource->getName());
+            Value* taintedPtr = builder.CreateAlignedLoad(taintCell, taintCellAlign, "tainted_" + taintSource->getName());
 
             while (taintSource->hasNUsesOrMore(2)) {
                 auto uit = taintSource->use_begin();

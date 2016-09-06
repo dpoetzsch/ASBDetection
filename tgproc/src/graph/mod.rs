@@ -34,6 +34,7 @@ pub struct Graph {
 }
 
 struct LineParts<'a> {
+    pid : u16,
     loc : &'a str,
     cmd : &'a str,
     tnt_flow : &'a str
@@ -43,13 +44,23 @@ impl<'a> LineParts<'a> {
     fn new(line: &'a str) -> Option<LineParts<'a>> {
         let mut l_split = line.split(" | ");
 
-        let loc_part = l_split.next();
+        let part1 = l_split.next().unwrap();
+
+        let mut i = 2;
+        for c in part1.chars().skip(2) {
+            if c == '=' {
+                break;
+            }
+            i += 1;
+        }
+
         let cmd_part = l_split.next();
         let tnt_flow = l_split.nth(2);
 
         tnt_flow.map(|flow| {
             LineParts {
-                loc: loc_part.unwrap(),
+                pid: (&part1[2..i]).parse::<u16>().unwrap(),
+                loc: &part1[i+3..],
                 cmd: cmd_part.unwrap(),
                 tnt_flow: flow
             }
@@ -60,7 +71,7 @@ impl<'a> LineParts<'a> {
 impl Graph {
     #[allow(unused_parens)]
     pub fn new<T: TgMetaDb>(options: Options, mut meta_db: Option<&mut T>) -> Result<Graph> {
-        let mut tg_ops: TgNodeMap = HashMap::new();
+        let mut tg_ops: TgNodeMap = TgNodeMap::new();
         let mut locations = HashSet::new();
         
         let mut graph = Graph {
@@ -77,7 +88,8 @@ impl Graph {
             let l : String = line.unwrap();
 
             if let Some(lparts) = LineParts::new(&l) {
-                let (var, mut tgo) = TgNode::new(lparts.loc,
+                let (var, mut tgo) = TgNode::new(lparts.pid,
+                                                 lparts.loc,
                                                  lparts.cmd,
                                                  lparts.tnt_flow,
                                                  idx,
@@ -107,7 +119,7 @@ impl Graph {
                 }
 
                 if let Some(ref v) = var {
-                    if let Some(op) = tg_ops.get(v.as_str()) {
+                    if let Some(op) = tg_ops.get_node(lparts.pid, v.as_str()) {
                         panic!(format!("ERROR: Duplicated definition of {} in lines {} and {}",
                                        v,
                                        op.idx + 1,
@@ -158,7 +170,7 @@ impl Graph {
                     }
 
                     if let Some(nfv) = node_for_var {
-                        tg_ops.insert(v.to_string(), nfv);
+                        tg_ops.insert_node(lparts.pid, v, nfv);
                     }
                 }
 

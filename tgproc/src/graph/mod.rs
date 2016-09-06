@@ -34,6 +34,7 @@ pub struct Graph {
 }
 
 struct LineParts<'a> {
+    pid : u16,
     loc : &'a str,
     cmd : &'a str,
     tnt_flow : &'a str
@@ -43,13 +44,23 @@ impl<'a> LineParts<'a> {
     fn new(line: &'a str) -> Option<LineParts<'a>> {
         let mut l_split = line.split(" | ");
 
-        let loc_part = l_split.next();
+        let part1 = l_split.next().unwrap();
+
+        let mut i = 2;
+        for c in part1.chars().skip(2) {
+            if c == '=' {
+                break;
+            }
+            i += 1;
+        }
+
         let cmd_part = l_split.next();
         let tnt_flow = l_split.nth(2);
 
         tnt_flow.map(|flow| {
             LineParts {
-                loc: loc_part.unwrap(),
+                pid: (&part1[2..i]).parse::<u16>().unwrap(),
+                loc: &part1[i+3..],
                 cmd: cmd_part.unwrap(),
                 tnt_flow: flow
             }

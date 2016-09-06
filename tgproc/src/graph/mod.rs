@@ -105,10 +105,11 @@ impl Graph {
                         sr.clear()
                     }
                 }
-                
+
                 if let Some(ref v) = var {
                     if let Some(op) = tg_ops.get(v.as_str()) {
-                        panic!(format!("ERROR: Duplicated definition in lines {} and {}",
+                        panic!(format!("ERROR: Duplicated definition of {} in lines {} and {}",
+                                       v,
                                        op.idx + 1,
                                        idx+1))
                     }

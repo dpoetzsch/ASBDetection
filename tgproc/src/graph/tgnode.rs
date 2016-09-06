@@ -66,10 +66,29 @@ pub struct TgNode {
     pub taint: Taint
 }
 
-pub type TgNodeMap = HashMap<String, Rc<TgNode>>;
+pub struct TgNodeMap(HashMap<String, Rc<TgNode>>);
+
+impl TgNodeMap {
+    pub fn new() -> TgNodeMap {
+        TgNodeMap(HashMap::new())
+    }
+
+    pub fn get_node(&self, pid: u16, varname: &str) -> Option<&Rc<TgNode>> {
+        let &TgNodeMap(ref map) = self;
+        let key = pid.to_string() + varname;
+        map.get(&key)
+    }
+
+    pub fn insert_node(&mut self, pid: u16, varname: &str, node: Rc<TgNode>) -> Option<Rc<TgNode>> {
+        let &mut TgNodeMap(ref mut map) = self;
+        let key = pid.to_string() + varname;
+        map.insert(key, node)
+    }
+}
 
 impl TgNode {
-    pub fn new(loc_part: &str,
+    pub fn new(pid: u16,
+               loc_part: &str,
                cmd_part: &str,
                tnt_flow: &str,
                idx: usize,
@@ -82,7 +101,7 @@ impl TgNode {
         };
 
         // connect to predecessors + find some sink_reasons
-        let var = node.analyze_taint_flow(tnt_flow, graph);
+        let var = node.analyze_taint_flow(pid, tnt_flow, graph);
         
         // calculate the taint
         node.calc_taint(cmd_part);
@@ -96,6 +115,7 @@ impl TgNode {
     ///
     /// Returns the variable that is defined in this node if any
     fn analyze_taint_flow(&mut self,
+                          pid: u16,
                           tnt_flow: &str,
                           graph: &TgNodeMap) -> Option<String> {
         lazy_static! {
@@ -114,7 +134,7 @@ impl TgNode {
                     }
                     
                     for f in cap.at(3).unwrap().split(", ") {
-                        self.preds.push(TgEdge::new(f.to_string(), graph.get(f).map(|n| n.clone())));
+                        self.preds.push(TgEdge::new(f.to_string(), graph.get_node(pid, f).map(|n| n.clone())));
                     }
                 } else {
                     // e.g. t78_744 <*- t72_268 (for dereferencing)
@@ -122,7 +142,7 @@ impl TgNode {
                     // we MUST not dereference or store a red value,
                         // however this does not count as taintflow
                     for f in cap.at(3).unwrap().split(", ") {
-                        if let Some(n) = graph.get(f) {
+                        if let Some(n) = graph.get_node(pid, f) {
                             if n.is_red() {
                                 self.sink_reasons.push(n.clone());
                             }
@@ -131,7 +151,7 @@ impl TgNode {
                 }
             } else { // e.g. t54_1741
                 for f in pred.split(", ") {
-                    self.preds.push(TgEdge::new(f.to_string(), graph.get(f).map(|n| n.clone())));
+                    self.preds.push(TgEdge::new(f.to_string(), graph.get_node(pid, f).map(|n| n.clone())));
                 }
             }
         }

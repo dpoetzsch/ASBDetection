@@ -71,7 +71,7 @@ impl<'a> LineParts<'a> {
 impl Graph {
     #[allow(unused_parens)]
     pub fn new<T: TgMetaDb>(options: Options, mut meta_db: Option<&mut T>) -> Result<Graph> {
-        let mut tg_ops: TgNodeMap = HashMap::new();
+        let mut tg_ops: TgNodeMap = TgNodeMap::new();
         let mut locations = HashSet::new();
         
         let mut graph = Graph {
@@ -88,7 +88,8 @@ impl Graph {
             let l : String = line.unwrap();
 
             if let Some(lparts) = LineParts::new(&l) {
-                let (var, mut tgo) = TgNode::new(lparts.loc,
+                let (var, mut tgo) = TgNode::new(lparts.pid,
+                                                 lparts.loc,
                                                  lparts.cmd,
                                                  lparts.tnt_flow,
                                                  idx,
@@ -118,7 +119,7 @@ impl Graph {
                 }
 
                 if let Some(ref v) = var {
-                    if let Some(op) = tg_ops.get(v.as_str()) {
+                    if let Some(op) = tg_ops.get_node(lparts.pid, v.as_str()) {
                         panic!(format!("ERROR: Duplicated definition of {} in lines {} and {}",
                                        v,
                                        op.idx + 1,
@@ -169,7 +170,7 @@ impl Graph {
                     }
 
                     if let Some(nfv) = node_for_var {
-                        tg_ops.insert(v.to_string(), nfv);
+                        tg_ops.insert_node(lparts.pid, v, nfv);
                     }
                 }
 

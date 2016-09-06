@@ -46,21 +46,22 @@ impl<'a> LineParts<'a> {
 
         let part1 = l_split.next().unwrap();
 
-        let mut i = 2;
-        for c in part1.chars().skip(2) {
-            if c == '=' {
-                break;
+        let mut it = part1.char_indices().skip(2).skip_while(|c| c.1 != '=');
+
+        let pid = it.next().map(|(idx, _)| {
+            match (&part1[2..idx]).parse::<u16>() {
+                Ok(x) => x,
+                Err(_) => panic!(format!("Could not parse pid of line {}", line))
             }
-            i += 1;
-        }
+        });
 
         let cmd_part = l_split.next();
         let tnt_flow = l_split.nth(2);
 
         tnt_flow.map(|flow| {
             LineParts {
-                pid: (&part1[2..i]).parse::<u16>().unwrap(),
-                loc: &part1[i+3..],
+                pid: pid.unwrap(),
+                loc: &part1[it.nth(2).unwrap().0..],
                 cmd: cmd_part.unwrap(),
                 tnt_flow: flow
             }

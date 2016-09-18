@@ -191,17 +191,27 @@ impl TgNode {
                         self.taint = Taint::Red;
                     }
                 } else if cmd.starts_with("Cmp") {
-                    // because we are blue at least one pred is blue
-                    // if the other one is blue, too, everything is fine and we are green
-                    // if the other one is green nothing is fine and we go red
-                    let mut blue_preds = self.preds.iter().filter(|&&TgEdge{ ref dest, .. }| {
-                        dest.as_ref().map_or(true, |p| p.is_blue())
-                    });
+                    let mut split = cmd.split(" ");
+                    let arg1 = split.nth(1).unwrap();
+                    let arg2 = split.next().unwrap();
 
-                    if blue_preds.nth(1).is_some() { // the other one is blue, too
-                        self.taint = Taint::Green
-                    } else { // we know that at least one pred is blue because self.is_blue() above
-                        self.taint = Taint::Red
+                    if arg1 == "0x0" || arg2 == "0x0" {
+                        // this is a null pointer comparison, everything is fine
+                        self.taint = Taint::Green;
+                    } else {
+                        // We must not compare a pointer to a non-pointer value
+                        // because we are blue at least one pred is blue
+                        // if the other one is blue, too, everything is fine and we are green
+                        // if the other one is green nothing is fine and we go red
+                        let mut blue_preds = self.preds.iter().filter(|&&TgEdge{ ref dest, .. }| {
+                            dest.as_ref().map_or(true, |p| p.is_blue())
+                        });
+
+                        if blue_preds.nth(1).is_some() { // the other one is blue, too
+                            self.taint = Taint::Green
+                        } else { // we know that at least one pred is blue because self.is_blue() above
+                            self.taint = Taint::Red
+                        }
                     }
                 } else {
                     if let Some(cap) = RE_SUB_CMD.captures(cmd) {

@@ -4,4 +4,4 @@ B                                       add02.c:0008:                 main:  int
 B                                       add02.c:0009:                 main:  return f((int) xp, y);
 B                                       add02.c:0001:                    f:  int f(int a, int b) {
 B                                       add02.c:0002:                    f:  return a+b;
-B                                            ??:0000:                _Exit:  [file not found]
+B                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

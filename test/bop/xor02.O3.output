@@ -1,4 +1,4 @@
 >>>> The origin of the taint should be just here <<<<
 B                                       xor02.c:0005:                 main:  int main() {
 R                                       xor02.c:0009:                 main:  return f((int) xp, y);
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

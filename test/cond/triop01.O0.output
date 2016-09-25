@@ -9,4 +9,4 @@ B                                     triop01.c:0005:                 main:  int
 B                                     triop01.c:0006:                 main:  int i = 0;
 B                                     triop01.c:0001:                    f:  int f(int b) {
 R                                     triop01.c:0002:                    f:  return ((b+b) == (b+5)) ? 0 : 4;
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

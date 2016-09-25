@@ -4,4 +4,4 @@ B                                       div03.c:0008:                 main:  int
 B                                       div03.c:0009:                 main:  return f(x, (int) yp);
 B                                       div03.c:0001:                    f:  int f(int a, int b) {
 R                                       div03.c:0002:                    f:  return a/b;
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

@@ -4,4 +4,4 @@ B                                     deref04.c:0003:                 main:  lon
 R                                     deref04.c:0004:                 main:  long r = ip + ip;
 R                                     deref04.c:0008:                 main:  a[1] = r;
 R                                     deref04.c:0010:                 main:  return a[1];
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

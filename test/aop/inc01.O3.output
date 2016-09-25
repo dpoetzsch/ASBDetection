@@ -1,4 +1,4 @@
 >>>> The origin of the taint should be just here <<<<
 B                                       inc01.c:0006:                 main:  int main() {
 R                                       inc01.c:0009:                 main:  return f((int) xp);
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

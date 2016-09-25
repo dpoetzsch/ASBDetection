@@ -5,4 +5,4 @@ B                                       inc01.c:0009:                 main:  ret
 B                                       inc01.c:0001:                    f:  int f(int a) {
 B                                       inc01.c:0002:                    f:  ++a;
 B                                       inc01.c:0003:                    f:  return a;
-B                                            ??:0000:                _Exit:  [file not found]
+B                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

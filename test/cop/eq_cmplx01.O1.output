@@ -3,4 +3,4 @@ B                                  eq_cmplx01.c:0001:                    f:  int
 R                                  eq_cmplx01.c:0003:                    f:  return (((int) &y) == x) ? 1 : 0;
 R                                 eq_cmplx01.O1:0000:                 main:  [file not found]
 R                                  eq_cmplx01.c:0008:                 main:  return f(0) + f((int) &i);
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

@@ -2,10 +2,10 @@
 B                                       mul01.c:0005:                 main:  int main() {
 B                                       mul01.c:0010:                 main:  return f((int) xp, (int) yp);
 R                                       mul01.c:0002:                    f:  return a*b;
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]
 --------------------------------------------------------------------------------
 >>>> The origin of the taint should be just here <<<<
 B                                       mul01.c:0005:                 main:  int main() {
 B                                       mul01.c:0010:                 main:  return f((int) xp, (int) yp);
 R                                       mul01.c:0002:                    f:  return a*b;
-R                                            ??:0000:                _Exit:  [file not found]
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

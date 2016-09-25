@@ -1,8 +1,8 @@
 >>>> The origin of the taint should be just here <<<<
-B                     triop01.c:0005:                 main:  int main() {
-R                     triop01.c:0007:                 main:  return f((int) &i);
+B                                     triop01.c:0005:                 main:  int main() {
+R                                     triop01.c:0007:                 main:  return f((int) &i);
 ================================================================================
 >>>> The origin of the taint should be just here <<<<
-B                     triop01.c:0005:                 main:  int main() {
-R                     triop01.c:0007:                 main:  return f((int) &i);
-R                            ??:0000:                _Exit:  [file not found]
+B                                     triop01.c:0005:                 main:  int main() {
+R                                     triop01.c:0007:                 main:  return f((int) &i);
+R                                            ??:0000:                _Exit:  [file not found]

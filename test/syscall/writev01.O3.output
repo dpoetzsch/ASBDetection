@@ -1,16 +1,16 @@
 >>>> The origin of the taint should be just here <<<<
-R                   writev01.O3:0000:        __wrap_writev:  [file not found]
+R                                   writev01.O3:0000:        __wrap_writev:  [file not found]
 --------------------------------------------------------------------------------
 >>>> The origin of the taint should be just here <<<<
-R                   writev01.O3:0000:        __wrap_writev:  [file not found]
+R                                   writev01.O3:0000:        __wrap_writev:  [file not found]
 --------------------------------------------------------------------------------
 >>>> The origin of the taint should be just here <<<<
-R                   writev01.O3:0000:        __wrap_writev:  [file not found]
+R                                   writev01.O3:0000:        __wrap_writev:  [file not found]
 --------------------------------------------------------------------------------
 >>>> The origin of the taint should be just here <<<<
-R                   writev01.O3:0000:        __wrap_writev:  [file not found]
+R                                   writev01.O3:0000:        __wrap_writev:  [file not found]
 --------------------------------------------------------------------------------
 >>>> The origin of the taint should be just here <<<<
-B                    writev01.c:0005:                 main:  int main() {
-B                    writev01.c:0007:                 main:  int* ip = &i;
-R                   writev01.O3:0000:        __wrap_writev:  [file not found]
+B                                    writev01.c:0005:                 main:  int main() {
+B                                    writev01.c:0007:                 main:  int* ip = &i;
+R                                   writev01.O3:0000:        __wrap_writev:  [file not found]

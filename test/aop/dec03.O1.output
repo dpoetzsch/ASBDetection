@@ -1,4 +1,4 @@
 >>>> The origin of the taint should be just here <<<<
-B                       dec03.c:0006:                 main:  int main() {
-B                       dec03.c:0009:                 main:  return f((int) xp);
-B                            ??:0000:                _Exit:  [file not found]
+B                                       dec03.c:0006:                 main:  int main() {
+B                                       dec03.c:0009:                 main:  return f((int) xp);
+B                                            ??:0000:                _Exit:  [file not found]

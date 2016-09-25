@@ -1,5 +1,5 @@
 >>>> The origin of the taint should be just here <<<<
-B                      fork01.c:0009:                 main:  ip = &j;
-B                      fork01.c:0010:                 main:  return (int) ip;
-B                      fork01.c:0014:                 main:  }
-B                            ??:0000:                _Exit:  [file not found]
+B                                      fork01.c:0009:                 main:  ip = &j;
+B                                      fork01.c:0010:                 main:  return (int) ip;
+B                                      fork01.c:0014:                 main:  }
+B                                            ??:0000:                _Exit:  [file not found]

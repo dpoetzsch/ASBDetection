@@ -178,7 +178,7 @@ impl Display for TgMetaNode {
         }
 
         let lineno = self.loc.lineno.unwrap_or(0);
-        write!(f, "{:>29}:{:04}: {:>20}:  {}", relpath.display(), lineno, self.loc.func, line)
+        write!(f, "{:>45}:{:04}: {:>20}:  {}", relpath.display(), lineno, self.loc.func, line)
     }
 }
 

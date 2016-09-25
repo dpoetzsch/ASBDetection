@@ -181,8 +181,14 @@ impl Display for TgMetaNode {
             }
         }
 
+        let path_str = if relpath.to_str().map_or(0, |s| s.len()) > self.loc.file.len() {
+            format!("{:>45}", self.loc.file)
+        } else {
+            format!("{:>45}", relpath.display())
+        };
+
         let lineno = self.loc.lineno.unwrap_or(0);
-        write!(f, "{:>45}:{:04}: {:>20}:  {}", relpath.display(), lineno, self.loc.func, line)
+        write!(f, "{:>45}:{:04}: {:>20}:  {}", path_str, lineno, self.loc.func, line)
     }
 }
 

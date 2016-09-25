@@ -51,7 +51,7 @@ impl DebugInfoDb {
             let file = out_split.next().unwrap().to_string();
             
             if let Ok(lineno) = out_split.next().unwrap().trim().parse::<usize>() {
-                if (lineno != 0) {
+                if lineno != 0 {
                     addr_map.insert(addr, Some((file, lineno)));
                 } else {
                     addr_map.insert(addr, None);

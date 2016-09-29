@@ -55,38 +55,36 @@ Alternatively, one can build the source files separately:
 ```bash
 ./objectize.sh [additional clang options] src1.c
 ./objectize.sh [additional clang options] src2.c
-./link.sh [clang++] [additional linker options] src1.o src2.o
+clang[++] -g [additional linker options] src1.o src2.o
 ./dynalize.sh ./a.out
 ```
 
 The `objectize.sh` script is a convenient way to create object files when debugging because it creates intermediate LLVM IR files with and without instrumentation.
 To disable cleanup of those files pass the `--no-cleanup` option to the script.
 
-### Running without script support
+### Building without script support
 
 In a real-world build the call to `objectize.sh` and `link.sh` can be replaced by the following commands:
 
 ```bash
-ASB_DETECTION_HOME=/path/to/asb-detection
 # create object files
-clang -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0 -c -o src.o src.c
+clang -g -Xclang -load -Xclang /path/to/asb-detection/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0 -c -o src.o src.c
 # link the object files
-clang -g -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` src.o $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
+clang -g src.o
 ```
 
 Or, in one command:
 
 ```bash
-ASB_DETECTION_HOME=/path/to/asb-detection clang -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` src.c $ASB_DETECTION_HOME/wrappers/libc_wrapper.o
+clang -g -Xclang -load -Xclang /path/to/asb-detection/ASBDetection/libLLVMasbDetection.so src.c
 ```
 
 ### Integrating into autoconf/automake build
 
 ```bash
-export ASB_DETECTION_HOME=/path/to/asb-detection
 export CC=clang
-export CPPFLAGS=" -g -Xclang -load -Xclang $ASB_DETECTION_HOME/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0"
-export LDFLAGS="-g -Wl,`cat $ASB_DETECTION_HOME/wrappers/cli-args.txt` $ASB_DETECTION_HOME/wrappers/libc_wrapper.o"
+export CPPFLAGS=" -g -Xclang -load -Xclang /path/to/asb-detection/ASBDetection/libLLVMasbDetection.so -mllvm -asb-log-level -mllvm 0"
+export LDFLAGS="-g"
 ./configure
 make
 ```
@@ -94,9 +92,17 @@ make
 Or, alternatively:
 
 ```bash
-. path/to/asb-detection/setup-ac-build.sh
+. /path/to/asb-detection/setup-ac-build.sh
 ./configure
 make
+```
+
+### Executing instrumented binary without script support
+
+```bash
+ASB_DETECTION_HOME=/path/to/ast-detection
+LD_PRELOAD=$ASB_DETECTION_HOME/wrappers/libc_wrapper.so valgrind --tool=taintgrind --tainted-ins-only=yes <executable> > /dev/null 2> /tmp/tg.log
+$ASB_DETECTION_HOME/tgproc/target/release/tgproc /tmp/tg.log
 ```
 
 ## Run the tests

@@ -15,13 +15,13 @@ C_FILES := $(wildcard *.c)
 	$(BUILD_TOOLS_DIR)/objectize.sh -O3 $< $@
 
 %.O0: %.O0.o
-	$(BUILD_TOOLS_DIR)/link.sh -o $@ $<
+	clang -g -o $@ $<
 
 %.O1: %.O1.o
-	$(BUILD_TOOLS_DIR)/link.sh -o $@ $<
+	clang -g -o $@ $<
 
 %.O3: %.O3.o
-	$(BUILD_TOOLS_DIR)/link.sh -o $@ $<
+	clang -g -o $@ $<
 
 O0: $(C_FILES:.c=.O0)
 O1: $(C_FILES:.c=.O1)

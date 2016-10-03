@@ -187,7 +187,9 @@ namespace TaintAnalysis {
         }
 
         void visitReturnInst(ReturnInst &I) {
-            checkOperandForFuncPtrs(&I, I.getReturnValue());
+            if (I.getReturnValue() != nullptr) {
+                checkOperandForFuncPtrs(&I, I.getReturnValue());
+            }
         }
 
         void visitCallInst(CallInst &I) {

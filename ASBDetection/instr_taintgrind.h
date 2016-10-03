@@ -161,6 +161,18 @@ namespace TaintAnalysis {
 
             logState(20, endBlock->getParent());
         }
+
+        void checkOperandForFuncPtrs(Instruction* baseInstr, Value* op) {
+            if (isa<ConstantExpr>(op)) {
+                ConstantExpr* ce = dyn_cast<ConstantExpr>(op);
+                for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
+                    Value* ce_op = *uit;
+                    if (isa<Function>(ce_op)) {
+                        functionPtrSources.push_back(std::make_pair(baseInstr, ce));
+                    }
+                }
+            }
+        }
  
     public:
         InstrTaintgrindVisitor() {}
@@ -171,15 +183,12 @@ namespace TaintAnalysis {
         }
 
         void visitStoreInst(StoreInst &I) {
-            Value* op = I.getValueOperand();
-            if (isa<ConstantExpr>(op)) {
-                ConstantExpr* ce = dyn_cast<ConstantExpr>(op);
-                for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
-                    Value* ce_op = *uit;
-                    if (isa<Function>(ce_op)) {
-                        functionPtrSources.push_back(std::make_pair(&I, ce));
-                    }
-                }
+            checkOperandForFuncPtrs(&I, I.getValueOperand());
+        }
+
+        void visitCallInst(CallInst &I) {
+            for (auto uit = I.arg_begin(); uit != I.arg_end(); ++uit) {
+                checkOperandForFuncPtrs(&I, *uit);
             }
         }
 

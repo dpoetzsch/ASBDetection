@@ -12,7 +12,42 @@ namespace TaintAnalysis {
     struct InstrTaintgrindVisitor : public InstVisitor<InstrTaintgrindVisitor> {
     private:
         std::vector<std::pair<Instruction*,bool>> taintSources;
+        /// a vector of instructions that contain a function pointer as operand. This function pointer is the second element of the pair
+        std::vector<std::pair<Instruction*,ConstantExpr*>> functionPtrSources;
         int logLevel = 10; // log everything with level <=
+
+        void extractFunctionPtrExpr(Instruction* baseInstr, ConstantExpr* fptrExpr) {
+            BasicBlock* startBlock = baseInstr->getParent();
+
+            IRBuilder<> builder(getGlobalContext());
+            builder.SetInsertPoint(startBlock);
+
+            logState(10, startBlock->getParent());
+
+            // 1. insert temporary variable with the result of the ConstantExpr
+            Instruction* fptrInstr = fptrExpr->getAsInstruction();
+            for (auto it2 = startBlock->begin(); it2 != startBlock->end(); ++it2) {
+                if (&(*it2) == baseInstr) {
+                    startBlock->getInstList().insert(it2, fptrInstr);
+                    break;
+                }
+            }
+
+            logState(10, startBlock->getParent());
+
+            // 2. replace usage of ConstantExpr by the new temp value
+            while (fptrExpr->hasNUsesOrMore(1)) {
+                auto uit = fptrExpr->use_begin();
+
+                // replace the fptrExpr with the fptrInstr
+                uit->set(fptrInstr);
+            }
+
+            logState(10, startBlock->getParent());
+
+            // 3. add the temp value as taint source
+            taintSources.push_back(std::make_pair(fptrInstr, true));
+        }
 
         /**
          * Insert instructions to taint or untaint a source
@@ -135,6 +170,21 @@ namespace TaintAnalysis {
             taintSources.push_back(std::make_pair(&I, true));
         }
 
+        void visitStoreInst(StoreInst &I) {
+            Value* op = I.getValueOperand();
+            if (isa<ConstantExpr>(op)) {
+                ConstantExpr* ce = dyn_cast<ConstantExpr>(op);
+                if (ce->isCast() && (ce->getOpcode() == 45)) {
+                    for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
+                        Value* ce_op = *uit;
+                        if (isa<Function>(ce_op)) {
+                            functionPtrSources.push_back(std::make_pair(&I, ce));
+                        }
+                    }
+                }
+            }
+        }
+
         void visitICmpInst(ICmpInst &i) {
             //
             for (auto uit = i.op_begin(); uit != i.op_end(); ++uit) {
@@ -159,7 +209,12 @@ namespace TaintAnalysis {
         /// @return true if the taint for this function changed
         bool instrumentFunction(Function& f) {
             taintSources.clear();
+            functionPtrSources.clear();
             visit(f);
+
+            for (auto it = functionPtrSources.begin(); it != functionPtrSources.end(); ++it) {
+                extractFunctionPtrExpr(it->first, it->second);
+            }
 
             for (auto it = taintSources.begin(); it != taintSources.end(); ++it) {
                 // Ok, let's taint/untaint that value!

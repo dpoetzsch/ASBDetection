@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#PROCESS_TOOL=$(dirname $BASH_SOURCE)/process-taintgrind/process-taintgrind-output.rb
-PROCESS_TOOL=$(dirname $BASH_SOURCE)/tgproc/target/release/tgproc
-#PROCESS_TOOL=$(dirname $BASH_SOURCE)/tgproc/target/debug/tgproc
+ASB_DETECTION_DIR=$(dirname $BASH_SOURCE)
+#PROCESS_TOOL=$ASB_DETECTION_DIR/process-taintgrind/process-taintgrind-output.rb
+PROCESS_TOOL=$ASB_DETECTION_DIR/tgproc/target/release/tgproc
+#PROCESS_TOOL=$ASB_DETECTION_DIR/tgproc/target/debug/tgproc
 
 if [ -z "$1" ]; then
     echo "Usage: dynalize.sh [args] <executable | c-source>"
@@ -48,11 +49,11 @@ if [[ "$SRC" =~ \.c$ ]]; then
     
     OBJ_FILE="$TMP_BASE".o
     echo "Generating instrumented object file..."
-    $(dirname $BASH_SOURCE)/objectize.sh $OBJ_ARGS "$SRC" "$OBJ_FILE"
+    $ASB_DETECTION_DIR/objectize.sh $OBJ_ARGS "$SRC" "$OBJ_FILE"
     
     EXEC="$TMP_BASE"
     echo "Generating executable..."
-    $(dirname $BASH_SOURCE)/link.sh -o "$EXEC" "$OBJ_FILE"
+    clang -g -o "$EXEC" "$OBJ_FILE"
     
     CLEANUP_FILES="$CLEANUP_FILES $OBJ_FILE $EXEC"
 else
@@ -74,7 +75,7 @@ fi
 DEST_TG="$TMP_BASE.taintgrind.log"
 CLEANUP_FILES="$CLEANUP_FILES $DEST_TG"
 
-valgrind --tool=taintgrind --tainted-ins-only=yes "$EXEC" > /dev/null 2> "$DEST_TG"
+LD_PRELOAD=$ASB_DETECTION_DIR/wrappers/libc_wrapper.so valgrind --tool=taintgrind --tainted-ins-only=yes "$EXEC" > /dev/null 2> "$DEST_TG"
 
 $PROCESS_TOOL $PTO_ARGS "$DEST_TG"
 

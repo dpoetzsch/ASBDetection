@@ -33,14 +33,16 @@ void* calloc (size_t num, size_t size) {
 }
 
 ssize_t write(int channel, void* data, int size) {
-    short* d = (short*) data;
     short c = 0;
     // for some reasons it does not work with chars
-    int i;
-    for (i=0; i<(size/2); ++i) {
-        c |= d[i];
+    if (size > 0) {
+        int i;
+        short* d = (short*) data;
+        for (i=0; i<(size/2); ++i) {
+            c |= d[i];
+        }
+        c |= (short) ((char*) data)[size-1];
     }
-    c |= (short) ((char*) data)[size-1];
 
     real_write = dlsym(RTLD_NEXT, "write");
 
@@ -54,15 +56,18 @@ ssize_t write(int channel, void* data, int size) {
 ssize_t writev(int channel, const struct iovec *iov, int iovcnt) {
     // for some reasons it does not work with chars
     short c = 0;
-    int i, j;
+    int i;
+    size_t j;
     for (i = 0; i < iovcnt; ++i) {
-        int size = iov[i].iov_len;
-        short* data = (short*) iov[i].iov_base;
+        size_t size = iov[i].iov_len;
 
-        for (j = 0; j < (size / 2); ++j) {
-            c |= data[j];
+        if (size > 0) {
+            short* data = (short*) iov[i].iov_base;
+            for (j = 0; j < (size / 2); ++j) {
+                c |= data[j];
+            }
+            c |= (short) (((char*) data)[size-1]);
         }
-        c |= (short) ((char*) data)[size-1];
     }
 
     real_writev = dlsym(RTLD_NEXT, "writev");

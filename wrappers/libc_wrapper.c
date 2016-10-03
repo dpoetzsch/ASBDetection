@@ -46,11 +46,7 @@ ssize_t write(int channel, void* data, int size) {
 
     real_write = dlsym(RTLD_NEXT, "write");
 
-    if (c) {
-        real_write(channel, data, size);
-    } else {
-        real_write(channel, data, size);
-    }
+    return (c) ? real_write(channel, data, size) : real_write(channel, data, size);
 }
 
 ssize_t writev(int channel, const struct iovec *iov, int iovcnt) {
@@ -72,9 +68,5 @@ ssize_t writev(int channel, const struct iovec *iov, int iovcnt) {
 
     real_writev = dlsym(RTLD_NEXT, "writev");
 
-    if (c) {
-        real_writev(channel, iov, iovcnt);
-    } else {
-        real_writev(channel, iov, iovcnt);
-    }
+    return (c) ? real_writev(channel, iov, iovcnt) : real_writev(channel, iov, iovcnt);
 }

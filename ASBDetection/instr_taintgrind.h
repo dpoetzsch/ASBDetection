@@ -174,12 +174,10 @@ namespace TaintAnalysis {
             Value* op = I.getValueOperand();
             if (isa<ConstantExpr>(op)) {
                 ConstantExpr* ce = dyn_cast<ConstantExpr>(op);
-                if (ce->isCast() && (ce->getOpcode() == 45)) {
-                    for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
-                        Value* ce_op = *uit;
-                        if (isa<Function>(ce_op)) {
-                            functionPtrSources.push_back(std::make_pair(&I, ce));
-                        }
+                for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
+                    Value* ce_op = *uit;
+                    if (isa<Function>(ce_op)) {
+                        functionPtrSources.push_back(std::make_pair(&I, ce));
                     }
                 }
             }

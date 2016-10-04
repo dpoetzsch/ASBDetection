@@ -22,7 +22,7 @@ namespace TaintAnalysis {
             IRBuilder<> builder(getGlobalContext());
             builder.SetInsertPoint(startBlock);
 
-            logState(10, startBlock->getParent());
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr start");
 
             // 1. insert temporary variable with the result of the ConstantExpr
             Instruction* fptrInstr = fptrExpr->getAsInstruction();
@@ -33,7 +33,7 @@ namespace TaintAnalysis {
                 }
             }
 
-            logState(10, startBlock->getParent());
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr insert");
 
             // 2. replace usage of ConstantExpr by the new temp value
             while (fptrExpr->hasNUsesOrMore(1)) {
@@ -43,7 +43,7 @@ namespace TaintAnalysis {
                 uit->set(fptrInstr);
             }
 
-            logState(10, startBlock->getParent());
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr usage repl");
 
             // 3. add the temp value as taint source
             taintSources.push_back(std::make_pair(fptrInstr, true));
@@ -54,6 +54,8 @@ namespace TaintAnalysis {
          */
         void instrumentValue(Instruction* taintSource, bool taint) {
             BasicBlock* startBlock = taintSource->getParent();
+
+            logState(10, startBlock->getParent(), "instrumentValue 0 start");
 
             IRBuilder<> builder(getGlobalContext());
             builder.SetInsertPoint(startBlock);
@@ -80,13 +82,13 @@ namespace TaintAnalysis {
                 endBlock->getInstList().push_back(*it3);
             }
 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 1 move");
 
             // 2. Store the value in a newly allocated memory cell
             AllocaInst* taintCell = builder.CreateAlloca(taintSource->getType(), nullptr, "taintCell_" + taintSource->getName()); // TODO align 4?
             Instruction* storeTaintSrc = builder.CreateStore(taintSource, taintCell); // TODO align??
 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 2 store");
                 
             // 3. insert the taintgrind instrumentation
             // 3.a) create a taint label -- not needed
@@ -137,7 +139,7 @@ namespace TaintAnalysis {
             builder.CreateStore(zzq_resultLoad, tmp); // TODO align 8?
             builder.CreateLoad(tmp); // TODO align 8?
                 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 3 instr");
                 
             // 4. load the value from memory again and replace all usages of the taint source with the loaded value
             Value* taintedPtr = builder.CreateLoad(taintCell, "tainted_" + taintSource->getName());
@@ -154,12 +156,12 @@ namespace TaintAnalysis {
                 uit->set(taintedPtr);
             }
                 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 4 load");
 
             // 5. branch to the endBlock
             builder.CreateBr(endBlock);
 
-            logState(20, endBlock->getParent());
+            logState(20, endBlock->getParent(), "instrumentValue 5 br");
         }
 
         void checkOperandForFuncPtrs(Instruction* baseInstr, Value* op) {
@@ -237,10 +239,10 @@ namespace TaintAnalysis {
             return !taintSources.empty();
         }
 
-        void logState(int logLevel, Function* f) {
+        void logState(int logLevel, Function* f, std::string step) {
             if (logLevel <= this->logLevel) {
                 f->print(errs());
-                errs() << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                errs() << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ end of step " << step << " in function " << f->getName() << "\n";
             }
         }
 

@@ -1,0 +1,5 @@
+>>>> The origin of the taint should be just here <<<<
+B                                  func_ptr05.c:0005:                 main:  int main() {
+B                                  func_ptr05.c:0006:                 main:  long fp = (long) &f;
+R                                  func_ptr05.c:0008:                 main:  return (int) (fp | fp2);
+R                       /usr/lib64/libc-2.23.so:0000:                _Exit:  [file not found]

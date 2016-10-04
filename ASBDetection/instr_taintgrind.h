@@ -36,11 +36,12 @@ namespace TaintAnalysis {
             logState(10, startBlock->getParent(), "extractFunctionPtrExpr insert");
 
             // 2. replace usage of ConstantExpr by the new temp value
-            while (fptrExpr->hasNUsesOrMore(1)) {
-                auto uit = fptrExpr->use_begin();
-
-                // replace the fptrExpr with the fptrInstr
-                uit->set(fptrInstr);
+            for (auto uit = fptrExpr->use_begin(); uit != fptrExpr->use_end(); ++uit) {
+                if (uit->getUser() == baseInstr) {
+                    // replace the fptrExpr with the fptrInstr
+                    uit->set(fptrInstr);
+                    // don't break, there might be more uses in this
+                }
             }
 
             logState(10, startBlock->getParent(), "extractFunctionPtrExpr usage repl");

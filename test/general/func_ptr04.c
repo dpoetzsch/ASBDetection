@@ -3,6 +3,6 @@ int f() {
 }
 
 int main() {
-    void* fp = (void*) &f;
+    int (*fp)() = &f;
     return (int) fp;
 }

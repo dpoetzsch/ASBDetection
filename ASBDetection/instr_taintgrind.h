@@ -12,13 +12,51 @@ namespace TaintAnalysis {
     struct InstrTaintgrindVisitor : public InstVisitor<InstrTaintgrindVisitor> {
     private:
         std::vector<std::pair<Instruction*,bool>> taintSources;
+        /// a vector of instructions that contain a function pointer as operand. This function pointer is the second element of the pair
+        std::vector<std::pair<Instruction*,ConstantExpr*>> functionPtrSources;
         int logLevel = 10; // log everything with level <=
+
+        void extractFunctionPtrExpr(Instruction* baseInstr, ConstantExpr* fptrExpr) {
+            BasicBlock* startBlock = baseInstr->getParent();
+
+            IRBuilder<> builder(getGlobalContext());
+            builder.SetInsertPoint(startBlock);
+
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr start");
+
+            // 1. insert temporary variable with the result of the ConstantExpr
+            Instruction* fptrInstr = fptrExpr->getAsInstruction();
+            for (auto it2 = startBlock->begin(); it2 != startBlock->end(); ++it2) {
+                if (&(*it2) == baseInstr) {
+                    startBlock->getInstList().insert(it2, fptrInstr);
+                    break;
+                }
+            }
+
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr insert");
+
+            // 2. replace usage of ConstantExpr by the new temp value
+            for (auto uit = fptrExpr->use_begin(); uit != fptrExpr->use_end(); ++uit) {
+                if (uit->getUser() == baseInstr) {
+                    // replace the fptrExpr with the fptrInstr
+                    uit->set(fptrInstr);
+                    // don't break, there might be more uses in this
+                }
+            }
+
+            logState(10, startBlock->getParent(), "extractFunctionPtrExpr usage repl");
+
+            // 3. add the temp value as taint source
+            taintSources.push_back(std::make_pair(fptrInstr, true));
+        }
 
         /**
          * Insert instructions to taint or untaint a source
          */
         void instrumentValue(Instruction* taintSource, bool taint) {
             BasicBlock* startBlock = taintSource->getParent();
+
+            logState(10, startBlock->getParent(), "instrumentValue 0 start");
 
             IRBuilder<> builder(getGlobalContext());
             builder.SetInsertPoint(startBlock);
@@ -45,13 +83,13 @@ namespace TaintAnalysis {
                 endBlock->getInstList().push_back(*it3);
             }
 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 1 move");
 
             // 2. Store the value in a newly allocated memory cell
             AllocaInst* taintCell = builder.CreateAlloca(taintSource->getType(), nullptr, "taintCell_" + taintSource->getName()); // TODO align 4?
             Instruction* storeTaintSrc = builder.CreateStore(taintSource, taintCell); // TODO align??
 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 2 store");
                 
             // 3. insert the taintgrind instrumentation
             // 3.a) create a taint label -- not needed
@@ -102,7 +140,7 @@ namespace TaintAnalysis {
             builder.CreateStore(zzq_resultLoad, tmp); // TODO align 8?
             builder.CreateLoad(tmp); // TODO align 8?
                 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 3 instr");
                 
             // 4. load the value from memory again and replace all usages of the taint source with the loaded value
             Value* taintedPtr = builder.CreateLoad(taintCell, "tainted_" + taintSource->getName());
@@ -119,12 +157,24 @@ namespace TaintAnalysis {
                 uit->set(taintedPtr);
             }
                 
-            logState(10, endBlock->getParent());
+            logState(10, endBlock->getParent(), "instrumentValue 4 load");
 
             // 5. branch to the endBlock
             builder.CreateBr(endBlock);
 
-            logState(20, endBlock->getParent());
+            logState(20, endBlock->getParent(), "instrumentValue 5 br");
+        }
+
+        void checkOperandForFuncPtrs(Instruction* baseInstr, Value* op) {
+            if (isa<ConstantExpr>(op)) {
+                ConstantExpr* ce = dyn_cast<ConstantExpr>(op);
+                for (auto uit = ce->op_begin(); uit != ce->op_end(); ++uit) {
+                    Value* ce_op = *uit;
+                    if (isa<Function>(ce_op)) {
+                        functionPtrSources.push_back(std::make_pair(baseInstr, ce));
+                    }
+                }
+            }
         }
  
     public:
@@ -133,6 +183,22 @@ namespace TaintAnalysis {
 
         void visitAllocaInst(AllocaInst &I) {
             taintSources.push_back(std::make_pair(&I, true));
+        }
+
+        void visitStoreInst(StoreInst &I) {
+            checkOperandForFuncPtrs(&I, I.getValueOperand());
+        }
+
+        void visitReturnInst(ReturnInst &I) {
+            if (I.getReturnValue() != nullptr) {
+                checkOperandForFuncPtrs(&I, I.getReturnValue());
+            }
+        }
+
+        void visitCallInst(CallInst &I) {
+            for (auto uit = I.arg_begin(); uit != I.arg_end(); ++uit) {
+                checkOperandForFuncPtrs(&I, *uit);
+            }
         }
 
         void visitICmpInst(ICmpInst &i) {
@@ -159,7 +225,12 @@ namespace TaintAnalysis {
         /// @return true if the taint for this function changed
         bool instrumentFunction(Function& f) {
             taintSources.clear();
+            functionPtrSources.clear();
             visit(f);
+
+            for (auto it = functionPtrSources.begin(); it != functionPtrSources.end(); ++it) {
+                extractFunctionPtrExpr(it->first, it->second);
+            }
 
             for (auto it = taintSources.begin(); it != taintSources.end(); ++it) {
                 // Ok, let's taint/untaint that value!
@@ -169,10 +240,10 @@ namespace TaintAnalysis {
             return !taintSources.empty();
         }
 
-        void logState(int logLevel, Function* f) {
+        void logState(int logLevel, Function* f, std::string step) {
             if (logLevel <= this->logLevel) {
                 f->print(errs());
-                errs() << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                errs() << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ end of step " << step << " in function " << f->getName() << "\n";
             }
         }
 

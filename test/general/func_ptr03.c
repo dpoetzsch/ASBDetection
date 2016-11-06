@@ -2,7 +2,11 @@ int f() {
     return 4;
 }
 
+int g(long x) {
+    return x;
+}
+
 int main() {
-    void* fp = (void*) &f;
+    long fp = g(f);
     return (int) fp;
 }
